@@ -1,6 +1,7 @@
 """Import Libraries"""
 import librosa
 import os
+import soundfile as sf
 
 """Load Audio File"""
 audio_file = '/Users/miguelhamdi/Desktop/123.mp3'
@@ -11,18 +12,33 @@ duration = librosa.get_duration(y=y, sr=sr)
 tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
 duration_in_minutes = duration / 60
 beats_in_song = duration_in_minutes * tempo
-number_of_eight_bars = beats_in_song / 8
+
+
 """Find the duration of each 8 bar segment"""
+number_of_eight_bars = beats_in_song / 8
 duration_per_eight_bar = duration / number_of_eight_bars
 
 """Split Audio into 8-Bar Clips"""
 all_eight_bars = []
 current_time = 0
-
-
+while current_time < duration:
+    eight_bar_end_time = current_time + duration_per_eight_bar
+    if eight_bar_end_time > duration:
+        eight_bar_end_time = duration
+    all_eight_bars.append((current_time, eight_bar_end_time))
+    current_time = eight_bar_end_time
 
 """Adding Each Bar to the Inverse Phase of the Previous Bar"""
 
 """Create a folder called Components"""
 
 """Save Each File into Folder"""
+if not os.path.exists('Components'):
+    os.mkdir('Components')
+
+# Save each 8-bar clip into the Components folder
+for i, segment in enumerate(all_eight_bars):
+    start_time = segment[0]
+    end_time = segment[1]
+    segment_audio = y[int(start_time * sr):int(end_time * sr)]
+    sf.write(f'Components/segment_{i+1}.wav', segment_audio, sr, subtype='PCM_16')
