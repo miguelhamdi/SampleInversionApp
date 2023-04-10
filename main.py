@@ -2,6 +2,7 @@
 import librosa
 import os
 import soundfile as sf
+import numpy as np
 
 """Load Audio File"""
 audio_file = '/Users/miguelhamdi/Desktop/123.mp3'
@@ -28,16 +29,25 @@ while current_time < duration:
     all_eight_bars.append((current_time, eight_bar_end_time))
     current_time = eight_bar_end_time
 
-"""Adding Each Bar to the Inverse Phase of the Previous Bar"""
+"""Adding Each item from all_eight_bars to the Inverse Phase of the Previous item the inverse phase of the sum is then added to the next iteration of the loop and putting it into a seperate list called bar_list"""
+bar_list =[]
+bar_list.append(all_eight_bars[0])
+all_eight_bars.pop(0)
+for i in range(len(all_eight_bars)):
+    prev_seg = -all_eight_bars[i-1]
+    current_seg = all_eight_bars[i]
+    if i != 0:
+        sum = sum + prev_seg + current_seg
+    else:
+        sum = prev_seg + current_seg
+    bar_list.append(sum)
 
 """Create a folder called Components"""
-
-"""Save Each File into Folder"""
 if not os.path.exists('Components'):
     os.mkdir('Components')
 
-# Save each 8-bar clip into the Components folder
-for i, segment in enumerate(all_eight_bars):
+"""Save Each File into Folder"""
+for i, segment in enumerate(bar_list):
     start_time = segment[0]
     end_time = segment[1]
     segment_audio = y[int(start_time * sr):int(end_time * sr)]
